@@ -1,0 +1,62 @@
+{
+  "categories": [
+    {
+      "id": "general",
+      "name": "General Questions",
+      "icon": "🤔"
+    },
+    {
+      "id": "technical",
+      "name": "Technical Support",
+      "icon": "⚙️"
+    },
+    {
+      "id": "account",
+      "name": "Account & Billing",
+      "icon": "💳"
+    },
+    {
+      "id": "features",
+      "name": "Features & Usage",
+      "icon": "✨"
+    }
+  ],
+  "qaItems": [
+    {
+      "id": 1,
+      "category": "general",
+      "question": "What is this application?",
+      "answer": "This is a Q&A chatbot application built to provide quick answers to common questions. You can search, browse by category, or chat with the bot."
+    },
+    {
+      "id": 2,
+      "category": "features",
+      "question": "How do I search for questions?",
+      "answer": "Use the search box at the top to find questions by keyword. Results update in real-time as you type."
+    },
+    {
+      "id": 3,
+      "category": "account",
+      "question": "Is my data private?",
+      "answer": "Yes, this application runs locally in your browser. No data is sent to external servers."
+    },
+    {
+      "id": 4,
+      "category": "technical",
+      "question": "What browsers are supported?",
+      "answer": "This app works on all modern browsers including Chrome, Firefox, Safari, and Edge."
+    },
+    {
+      "id": 5,
+      "category": "features",
+      "question": "Can I add more questions?",
+      "answer": "Yes! Edit the qa-data.json file to add new questions and answers. The app will load them automatically."
+    },
+    {
+      "id": 6,
+      "category": "general",
+      "question": "How do I get started?",
+      "answer": "Browse questions by category, use search, or start typing in the chat interface to ask questions."
+    }
+  ]
+}
