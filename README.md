@@ -10,6 +10,7 @@ A web-based chatbot Q&A application that mirrors Power Virtual Agents / Copilot 
 - ⚙️ **Admin Panel** - Add/manage categories, questions, answers, descriptions, key phrases, and code snippets
 - 🔍 **Smart Search** - Search across questions, answers, descriptions, key phrases, and code
 - 📥 **Import/Export** - Download your data as JSON for backup or transfer to other systems
+- 🤖 **PVA Migration** - Import topics exported from Power Virtual Agents / Copilot Studio into Clippy's Q&A format
 - 💾 **Code Storage** - Store JavaScript, PowerShell scripts, or any code snippets with your Q&A items
 - 📋 **Copy Button** - One-click copy functionality for code snippets
 - 🎨 **Category Management** - Create custom categories with emoji icons
@@ -59,6 +60,35 @@ A web-based chatbot Q&A application that mirrors Power Virtual Agents / Copilot 
   - Export: Downloads JSON file with all your Q&A data
   - Import: Upload previously exported JSON files
 - **Delete Items**: Remove unwanted Q&A entries
+
+## Migrating from Power Virtual Agents (PVA)
+
+Clippy can import topics exported from Power Virtual Agents / Copilot Studio.
+
+### Supported PVA JSON formats
+
+| Format | Description |
+|--------|-------------|
+| Single topic object | `{ "name": "...", "triggerPhrases": [...], "nodes": [...] }` |
+| Array of topics | `[ { "name": "..." }, ... ]` |
+| Collection with `topics` key | `{ "topics": [ { "name": "..." }, ... ] }` |
+
+### Field mapping
+
+| PVA field | Clippy field | Notes |
+|-----------|--------------|-------|
+| `name` | Question | Topic name becomes the question |
+| `triggerPhrases` | Key phrases | All trigger phrases joined with ", " |
+| `description` | Description | Used as-is |
+| `nodes` (Message/SendMessage type) | Answer | All message node texts joined with a space |
+
+### How to import PVA topics
+
+1. Open the **Admin** tab (⚙️)
+2. In the **Data Management** section, click **🤖 Import PVA Topics**
+3. Select your PVA JSON export file
+4. Imported topics appear under the **PVA Import 🤖** category
+5. Review each item — edit answers and assign to the correct category as needed
 
 ## Data Format
 

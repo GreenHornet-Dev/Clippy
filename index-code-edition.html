@@ -200,6 +200,86 @@
                 alert('✅ Data exported!');
             };
 
+            // Import PVA topics
+            const handlePVAImport = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const pvaData = JSON.parse(event.target.result);
+
+                        // Support single topic, array of topics, or { topics: [...] }
+                        let topics = [];
+                        if (Array.isArray(pvaData)) {
+                            topics = pvaData;
+                        } else if (pvaData.topics && Array.isArray(pvaData.topics)) {
+                            topics = pvaData.topics;
+                        } else if (pvaData.name !== undefined) {
+                            topics = [pvaData];
+                        } else {
+                            alert('❌ Could not find topics in the PVA JSON. Expected a topic object, an array of topics, or { "topics": [...] }.');
+                            return;
+                        }
+
+                        if (topics.length === 0) {
+                            alert('❌ No topics found in the PVA JSON file.');
+                            return;
+                        }
+
+                        // Ensure the PVA Import category exists
+                        const pvaCategoryId = 'pva_import';
+                        setCategories(prev => {
+                            if (prev.some(c => c.id === pvaCategoryId)) return prev;
+                            return [...prev, { id: pvaCategoryId, name: 'PVA Import', icon: '🤖' }];
+                        });
+
+                        // Convert each PVA topic to a Clippy Q&A item
+                        setQaItems(prev => {
+                            const startId = Math.max(...prev.map(i => i.id), 0) + 1;
+                            const newItems = topics.map((topic, index) => {
+                                // Collect text from all Message-type nodes as the answer
+                                let answer = '';
+                                if (topic.nodes && Array.isArray(topic.nodes)) {
+                                    const messageParts = topic.nodes
+                                        .filter(n => {
+                                            const t = (n.type || '').toLowerCase();
+                                            return t === 'message' || t === 'sendmessage';
+                                        })
+                                        .map(n => n.properties?.text || n.properties?.message || n.text || '')
+                                        .filter(t => t.trim());
+                                    answer = messageParts.join(' ');
+                                }
+                                // Fallback to description or topic name if no message nodes found
+                                if (!answer) answer = topic.description || topic.name || '';
+
+                                const keyPhrases = Array.isArray(topic.triggerPhrases)
+                                    ? topic.triggerPhrases.join(', ')
+                                    : (topic.triggerPhrases || '');
+
+                                return {
+                                    id: startId + index,
+                                    category: pvaCategoryId,
+                                    question: topic.name || `Imported Topic ${startId + index}`,
+                                    answer: answer || 'No answer content found in topic nodes.',
+                                    description: topic.description || '',
+                                    keyPhrases,
+                                    code: ''
+                                };
+                            });
+                            return [...prev, ...newItems];
+                        });
+
+                        setNextId(prev => prev + topics.length);
+                        alert(`✅ Imported ${topics.length} PVA topic(s) successfully! Check the "PVA Import" category.`);
+                    } catch (error) {
+                        alert('❌ Error importing PVA file. Make sure it\'s valid JSON.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+
             // Import data
             const handleImport = (e) => {
                 const file = e.target.files[0];
@@ -456,7 +536,7 @@
                         // Export/Import
                         React.createElement('div', { className: 'lg:col-span-2 bg-white rounded-lg shadow-lg border-2 border-indigo-200 p-6' },
                             React.createElement('h2', { className: 'text-2xl font-bold text-indigo-600 mb-4' }, '💾 Data Management'),
-                            React.createElement('div', { className: 'grid grid-cols-2 gap-4' },
+                            React.createElement('div', { className: 'grid grid-cols-1 sm:grid-cols-3 gap-4' },
                                 React.createElement('button', {
                                     onClick: handleExport,
                                     className: 'bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold'
@@ -471,9 +551,20 @@
                                             className: 'hidden'
                                         })
                                     )
+                                ),
+                                React.createElement('div', null,
+                                    React.createElement('label', { className: 'block w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 font-bold text-center cursor-pointer' },
+                                        '🤖 Import PVA Topics',
+                                        React.createElement('input', {
+                                            type: 'file',
+                                            accept: '.json',
+                                            onChange: handlePVAImport,
+                                            className: 'hidden'
+                                        })
+                                    )
                                 )
                             ),
-                            React.createElement('p', { className: 'text-sm text-gray-600 mt-4' }, '💡 Your JSON includes all Q&A with code snippets. Edit in VS Code and re-import.')
+                            React.createElement('p', { className: 'text-sm text-gray-600 mt-4' }, '💡 Export/Import: save and restore Clippy Q&A data. Import PVA Topics: migrate topics from a Power Virtual Agents JSON export into the "PVA Import" category.')
                         ),
 
                         // Current Items
