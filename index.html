@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clippy Q&A - Powered by React</title>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="module">
+        // Q&A Data — Custom Design Systems knowledge base
+        // tags[] are searched with scoring: question match = 3pts, tag match = 2pts, answer match = 1pt
+        const qaData = {
+            categories: [
+                { id: "sop",      name: "Service Requests & Quotes", icon: "📋" },
+                { id: "services", name: "Services",                  icon: "⚙️" },
+                { id: "3dprint",  name: "3D Printing",               icon: "🖨️" },
+                { id: "pricing",  name: "Pricing & Payment",         icon: "💳" },
+                { id: "contact",  name: "Contact & Process",         icon: "📞" },
+                { id: "it-sop",  name: "IT SOPs",                    icon: "🗂️" },
+                { id: "winget",  name: "Winget & Software",          icon: "📦" }
+            ],
+            qaItems: [
+                // ── SOP / Service Request Form ───────────────────────────────
+                {
+                    id: 1,
+                    category: "sop",
+                    question: "How do I request a service or get a quote?",
+                    answer: "Fill out the Service Request Form on the Services page — go to Services in the nav, then scroll to 'Request a Quote', or click 'Get a Quote' in the top menu. Direct link: services.html#invoice. We respond within 24 hours with a quote and next steps.",
+                    tags: ["sop","service order","service request","quote","form","invoice","get a quote","request","order","submit","how to request","service order proposal"]
+                },
+                {
+                    id: 2,
+                    category: "sop",
+                    question: "What is the SOP / service order form?",
+                    answer: "The SOP (Service Order/Purchase) form — also called the Quote Request form — is on the Services page. It collects your name, email, service type, platform, budget, urgency, and a project description. Once submitted we review and reply within 24 hours. For 3D printing jobs, select '3D Printing' and extra fields appear automatically.",
+                    tags: ["sop","what is sop","service order form","service order proposal","quote form","request form","invoice form","what is the form"]
+                },
+                {
+                    id: 3,
+                    category: "sop",
+                    question: "What information do I need to fill out the request form?",
+                    answer: "You'll need: your first/last name, email (phone is optional), service type, platform (Windows/Mac/New Build), urgency, and a description of the issue or project. For builds, include a budget range. For 3D prints, describe what you need and mention any file you have (STL, OBJ, etc.).",
+                    tags: ["form fields","what to fill out","information needed","required fields","form info","what do i need","form details"]
+                },
+                {
+                    id: 4,
+                    category: "sop",
+                    question: "Can I request 3D printing through the service form?",
+                    answer: "Yes — select '3D Printing' from the Service Type dropdown on the quote form and extra fields appear for material preference and design file status. You can also use the dedicated request form at the bottom of the 3D Printing page (3d-printing.html#request).",
+                    tags: ["3d print form","3d print request","order 3d print","request 3d printing","3d service request","3d form","print form"]
+                },
+
+                // ── Services ─────────────────────────────────────────────────
+                {
+                    id: 5,
+                    category: "services",
+                    question: "What services does Custom Design Systems offer?",
+                    answer: "Custom Design Systems offers: Remote Tech Support ($85/hr), Custom PC Builds ($95/hr + parts), Computer Repair ($75/hr + parts), and 3D Printing. We support Windows and Mac and serve both local and remote clients.",
+                    tags: ["services","what do you do","what do you offer","offerings","cds","all services","available","what can you help with"]
+                },
+                {
+                    id: 6,
+                    category: "services",
+                    question: "Do you offer remote tech support?",
+                    answer: "Yes. Secure AnyDesk remote sessions for virus/malware removal, slow PC fixes, software installs, network troubleshooting, email/printer setup, and Windows or macOS issues. You watch everything in real time. Rate: $85/hour — billed after the session.",
+                    tags: ["remote support","remote help","remote session","tech support","remote tech","online help","anydesk","virus removal","malware","slow pc","remote computer"]
+                },
+                {
+                    id: 7,
+                    category: "services",
+                    question: "Do you build custom PCs?",
+                    answer: "Yes — gaming rigs, workstations, home servers, and media PCs. Includes free parts consultation, quality sourcing, expert assembly, OS install, benchmark testing, and a 30-day labor warranty. Rate: $95/hour + parts. Requires a 50% deposit before parts are ordered.",
+                    tags: ["pc build","custom pc","gaming pc","build a computer","custom build","workstation","gaming rig","computer build","new pc","build pc"]
+                },
+                {
+                    id: 8,
+                    category: "services",
+                    question: "Do you repair computers and laptops?",
+                    answer: "Yes — screen replacements, keyboard/trackpad repair, HDD/SSD replacement, RAM upgrades, overheating fixes, power jack repair, and data recovery. On-site or drop-off. Rate: $75/hour + parts.",
+                    tags: ["repair","fix computer","broken laptop","screen repair","laptop repair","computer repair","broken screen","data recovery","ssd replacement","hardware fix"]
+                },
+                {
+                    id: 9,
+                    category: "services",
+                    question: "Do you work on Macs?",
+                    answer: "Yes. Remote tech support covers both Windows and macOS. Hardware repair for Apple devices is also available — mention your platform on the service request form.",
+                    tags: ["mac","macos","apple","macbook","mac support","imac","mac repair","mac help","apple computer"]
+                },
+                {
+                    id: 10,
+                    category: "services",
+                    question: "Do you make on-site visits?",
+                    answer: "Yes. On-site visits are available for local clients — travel billed at $0.67/mile plus the hourly labor rate. Mention your location in the service request form and we'll confirm availability.",
+                    tags: ["on-site","onsite","in person","local","visit","travel","in home","come to me","house call","local visit"]
+                },
+
+                // ── Pricing & Payment ────────────────────────────────────────
+                {
+                    id: 11,
+                    category: "pricing",
+                    question: "How much does remote tech support cost?",
+                    answer: "Remote tech support is $85 per hour. Most common jobs (virus removal, tune-up, software issues) run 1–2 hours. You're billed after the session — no upfront payment for remote work.",
+                    tags: ["remote support price","cost of remote","how much remote","tech support cost","rate","price remote","$85","hourly rate","remote cost"]
+                },
+                {
+                    id: 12,
+                    category: "pricing",
+                    question: "How much does a custom PC build cost?",
+                    answer: "Labor is $95/hour plus parts. Typical ranges: Budget gaming PC $380–$570 labor (4–6hrs), mid-range workstation $475–$665 (5–7hrs), high-end rig $570–$760 (6–8hrs). A 50% deposit is required before parts are ordered.",
+                    tags: ["build cost","pc build price","gaming pc cost","how much build","build rate","custom pc price","$95","parts cost","build price"]
+                },
+                {
+                    id: 13,
+                    category: "pricing",
+                    question: "How much does computer repair cost?",
+                    answer: "Repair is $75/hour plus parts. Examples: Screen replacement $75–$150 + parts, SSD upgrade $75–$150 + parts, RAM upgrade $38–$75 + parts. Every job gets an itemized invoice.",
+                    tags: ["repair cost","repair price","how much repair","screen replacement price","fix price","repair rate","$75","repair pricing"]
+                },
+                {
+                    id: 14,
+                    category: "pricing",
+                    question: "How do I pay? What payment methods are accepted?",
+                    answer: "We accept Venmo (@CustomDesignSystems), Zelle, PayPal (via invoice), and personal check (payable to Custom Design Systems). Remote support billed after the session. Builds require a 50% deposit upfront. Repairs billed on completion.",
+                    tags: ["payment","how to pay","pay","venmo","zelle","paypal","check","accepted payments","payment method","billing","payment options"]
+                },
+                {
+                    id: 15,
+                    category: "pricing",
+                    question: "Is there a deposit for PC builds?",
+                    answer: "Yes. Custom PC builds require a 50% labor deposit before parts are ordered. The remaining balance is due on delivery or completion.",
+                    tags: ["deposit","down payment","upfront payment","build deposit","advance payment","50 percent","pay upfront","pre-payment"]
+                },
+
+                // ── 3D Printing ──────────────────────────────────────────────
+                {
+                    id: 16,
+                    category: "3dprint",
+                    question: "Do you offer 3D printing services?",
+                    answer: "Yes! We print functional parts, prototypes, hobby miniatures, tabletop terrain, custom decor, and desk accessories. Visit the 3D Printing page (3d-printing.html) for the full catalog, pricing table, and request form.",
+                    tags: ["3d printing","3d print","print","printing service","can you print","do you print","3d printer","fdm","filament printing"]
+                },
+                {
+                    id: 17,
+                    category: "3dprint",
+                    question: "What 3D printing materials do you use?",
+                    answer: "We print in: PLA (best for display/decorative pieces), PETG (strong all-rounder, great for functional parts), ABS (heat resistant, can be sanded/painted), and TPU (flexible, rubber-like — ideal for grips and gaskets). Specialty filaments like silk, wood-fill, and glow-in-the-dark available on request.",
+                    tags: ["material","filament","pla","petg","abs","tpu","what material","printing material","silk","flexible","filament type","print material"]
+                },
+                {
+                    id: 18,
+                    category: "3dprint",
+                    question: "Do you have pre-made template models I can order?",
+                    answer: "Yes! The Template Model Shop on the 3D Printing page has ready-to-order items: cable clips ($8), PC fan filters ($6), headphone stands ($18), dice towers ($22), miniature display bases ($12), custom nameplates ($15), and more. Click 'Order This' on any model and your request form auto-fills.",
+                    tags: ["template models","pre-made","ready to order","models","catalog","shop","available models","stock models","pre-designed","model shop","existing models"]
+                },
+                {
+                    id: 19,
+                    category: "3dprint",
+                    question: "How do I request a custom 3D print?",
+                    answer: "Fill out the print request form at 3d-printing.html#request. Describe what you need, pick a material, and let us know if you have an STL/OBJ/3MF file or need design help. We'll quote you within 24 hours.",
+                    tags: ["request 3d print","custom print","order print","how to get a print","3d print request","print order","3d print form","custom 3d"]
+                },
+                {
+                    id: 20,
+                    category: "3dprint",
+                    question: "How much does 3D printing cost?",
+                    answer: "Pricing starts at $5 for small parts and scales by material and print time. Examples: cable clips $8, fan filters $6, headphone stand $18, dice tower $22, nameplate $15, cable box $28. Custom pieces quoted individually. See the full table on the 3D Printing page.",
+                    tags: ["3d print cost","3d print price","how much print","print rate","printing cost","3d pricing","print price","filament price"]
+                },
+
+                // ── Contact & Process ────────────────────────────────────────
+                {
+                    id: 21,
+                    category: "contact",
+                    question: "How quickly do you respond to requests?",
+                    answer: "We respond to all service requests and quote inquiries within 24 hours. For urgent matters, select 'Urgent — ASAP' from the urgency dropdown on the request form.",
+                    tags: ["response time","how fast","how long","when will you reply","turnaround","24 hours","quick response","reply time","how soon"]
+                },
+                {
+                    id: 22,
+                    category: "contact",
+                    question: "How does the service process work?",
+                    answer: "1. Submit a request via the quote form (services.html#invoice). 2. We respond within 24hrs with a quote. 3. You approve and we schedule/begin work. 4. You're kept informed throughout. 5. Itemized invoice sent on completion.",
+                    tags: ["how does it work","process","steps","how to get started","workflow","service process","what happens","next steps"]
+                },
+                {
+                    id: 23,
+                    category: "contact",
+                    question: "How do I track a package?",
+                    answer: "Use the Package Tracker at package-tracker.html. Enter any tracking number — we auto-detect the carrier (UPS, USPS, FedEx, DHL, Airways, or Amazon). You can label packages and view full history.",
+                    tags: ["track package","tracking","track shipment","where is my package","ups","usps","fedex","dhl","amazon","airways","package tracker","shipping","track order","delivery"]
+                },
+
+                // ── IT SOPs ──────────────────────────────────────────────────
+                { id:24, category:"it-sop", question:"How do I manage web browsers for users?",           answer:"The Web Browser Management SOP covers resetting browser settings, clearing cache and cookies, managing extensions, configuring proxy settings, and troubleshooting browser performance.",     tags:["browser","web browser","chrome","firefox","edge","browser management","reset browser","clear cache","clear cookies","browser extensions","proxy","browser performance","browser settings","browser fix"] },
+                { id:25, category:"it-sop", question:"How do I set up or troubleshoot email?",            answer:"The Email / Mail Setup SOP covers configuring Outlook and webmail clients, fixing send/receive errors, setting up email signatures, managing mailbox quotas, and resolving sync issues.",      tags:["email","mail","outlook","mail setup","email setup","exchange","troubleshoot email","email signature","mailbox","sync email","send receive error","email not working","inbox","email config"] },
+                { id:26, category:"it-sop", question:"How do I set up or troubleshoot printers?",         answer:"The Printer Setup SOP covers adding local and network printers, installing drivers, clearing print queues, troubleshooting offline status, and configuring default print settings.",           tags:["printer","printers","print","printer setup","add printer","printer troubleshoot","print queue","offline printer","default printer","driver","install printer","printer not working","clear queue"] },
+                { id:27, category:"it-sop", question:"How do I manage drives and storage?",               answer:"The Drive Management SOP covers mapping network drives, managing disk partitions, checking drive health with SMART tools, running CHKDSK, cleaning up disk space, and resolving drive letter conflicts.", tags:["drive","storage","disk","network drive","map drive","disk management","chkdsk","smart","drive letter","disk partition","free up space","drive health","disk cleanup"] },
+                { id:28, category:"it-sop", question:"How do I manage Windows Updates?",                  answer:"The Windows Updates SOP covers forcing update checks, troubleshooting stuck updates, managing updates via Group Policy, pausing and resuming updates, and clearing the Windows Update cache.", tags:["windows update","update","updates","windows updates","update stuck","force update","check updates","wuauserv","update cache","windows 11 update","kb update","patch","wsus"] },
+                { id:29, category:"it-sop", question:"What are common help desk tasks?",                  answer:"The Help Desk Tasks SOP covers password resets, account lockouts, remote desktop setup, software installs, user onboarding, and procedures for recurring IT issues.",                           tags:["help desk","password reset","account lockout","remote desktop","helpdesk","common tasks","user reset","locked out","unlock account","it tasks","desktop support","tier 1","rdp"] },
+                { id:30, category:"it-sop", question:"How do I use Claude AI for IT tasks?",              answer:"The Claude AI & CoWork SOP covers using Claude AI to draft responses, summarize tickets, write documentation, handle software installs, user onboarding, and internal workflow documentation.", tags:["claude","ai","claude ai","cowork","ai tools","ai assistant","anthropic","draft response","summarize","ai help desk","claude cowork","ai documentation","ai tickets"] },
+                { id:31, category:"it-sop", question:"How do I use Microsoft Copilot?",                   answer:"The Microsoft Copilot SOP covers enabling and using Microsoft Copilot across M365 apps — generating content in Word/Outlook, using Copilot in Teams meetings, managing Copilot licensing, and handling policies.",  tags:["copilot","microsoft copilot","m365 copilot","copilot ai","ai copilot","ms copilot","co-pilot","microsoft ai","word copilot","excel copilot","teams copilot","outlook copilot","365 copilot","m365 ai","copilot license","copilot setup"] },
+                { id:32, category:"it-sop", question:"How do I use Power Automate?",                      answer:"The Power Automate SOP covers creating automated workflows, building approval flows, connecting apps and services, managing Copilot licensing, and troubleshooting flow permissions.",             tags:["power automate","automation","flow","automate","workflow","power automate flow","automated flow","approval flow","power platform","automate task","scheduled flow","pa flow"] },
+                { id:33, category:"it-sop", question:"How do I manage Office 365 apps?",                  answer:"The Office Apps SOP covers installing and activating Microsoft 365, troubleshooting activation errors, managing OneDrive sync, configuring app updates, and handling licensing.",                tags:["office","office 365","microsoft 365","m365","office apps","word","excel","powerpoint","onenote","office install","activate office","office license","microsoft office","365 apps","office activation"] },
+                { id:34, category:"it-sop", question:"How do I set up or troubleshoot Microsoft Teams?",  answer:"The Microsoft Teams SOP covers setting up Teams for new users, troubleshooting audio/video, managing guest access, configuring channels and permissions, fixing sign-in issues, and managing meeting policies.", tags:["teams","microsoft teams","chat","video call","teams meeting","teams channel","teams audio","screen share","teams troubleshoot","sign into teams","teams sign in","teams not working","guest access","teams setup"] },
+                { id:35, category:"it-sop", question:"How do I set up the 8x8 phone system?",            answer:"The 8x8 Phone System SOP covers provisioning extensions, configuring voicemail and call forwarding, troubleshooting softphone issues, managing ring groups, and onboarding new users to the VoIP platform.", tags:["8x8","phone","voip","phone system","8x8 phone","softphone","extension","voicemail","call forwarding","ring group","8x8 setup","8x8 troubleshoot","8x8 extension","8x8 voip"] },
+                { id:36, category:"it-sop", question:"How do I install and configure Zoom?",              answer:"The Zoom SOP covers installing and configuring Zoom, troubleshooting audio/video and screen share issues, managing Zoom licenses, setting up webinars, and configuring SSO and admin settings.",   tags:["zoom","zoom meeting","video conferencing","zoom call","zoom setup","zoom audio","zoom video","screen share zoom","zoom sso","zoom admin","zoom troubleshoot","zoom install","zoom not working","zoom license"] },
+                { id:37, category:"it-sop", question:"How do I deploy printers via print server?",        answer:"The Printers & Print Servers SOP covers deploying printers via print server, configuring IP printers, installing PCL/PS drivers, troubleshooting spooler crashes, and managing printer permissions and shared queues.", tags:["print server","printer server","ip printer","pcl","ps driver","print server setup","deploy printer","shared printer","tcp/ip printer","spooler","printer spooler","print spooler crash","network printer"] },
+                { id:38, category:"it-sop", question:"How do I activate an AT&T wireless device?",        answer:"The AT&T Wireless Activation SOP covers activating new SIM cards, transferring lines, setting up mobile devices for corporate use, and managing AT&T wireless accounts.",                       tags:["att","at&t","wireless","mobile","activation","sim","at&t activation","wireless activation","mobile device","imei","carrier activation","new phone setup","att wireless"] },
+                { id:39, category:"it-sop", question:"What is the new hire IT checklist?",                answer:"The New Hire IT Checklist covers account creation, UPN setup, group memberships, Intune MDM device enrollment, Lansweeper registration, software installs, and all onboarding steps for a new employee's first day.", tags:["new hire","onboarding","new employee","setup new user","new user","new hire checklist","user setup","create account","new account","upn","enroll device","intune","first day setup","onboard user","new hire it"] },
+                { id:40, category:"it-sop", question:"What is the departing employee IT checklist?",      answer:"The Departing Employee SOP covers disabling accounts, forwarding email to a manager, remote wiping devices via Intune, equipment return, removing licenses, and all steps for a clean employee exit.",  tags:["offboarding","departing employee","termination","exit checklist","remove user","disable account","equipment return","remote wipe","forward email","offboard user","employee exit","terminated user","departure checklist"] },
+                { id:41, category:"it-sop", question:"How do I use Lansweeper for asset management?",     answer:"Lansweeper scans and inventories all assets including Mac (via lsagent) and Windows devices.\nKey points for newsbank.com tenant:\n• API is tenant-scoped — calls only work from inside the tenant\n• Power Automate (inside tenant) is the correct data pipeline — already authenticated\n• Browser or external PowerShell calls will be rejected by conditional access\n• Clippy helps you build GraphQL queries and understand field names\n• Data flows: Lansweeper → Power Automate → SharePoint / Teams / Excel / report\nSOP: lansweeper.html", tags:["lansweeper","asset management","inventory","graphql","lsagent","lansweeper agent","asset scan","device inventory","lansweeper api","network scan","it asset","asset report","lansweeper reporting","power automate lansweeper","newsbank","tenant","conditional access"] },
+                { id:42, category:"it-sop", question:"How do I fix Okta authentication issues?",          answer:"The Okta SOP covers token sync after password changes, fixing OneDrive sync crashes, re-authenticating Office apps, clearing Windows Credential Manager, and resolving Hybrid Entra ID token issues.", tags:["okta","sso","single sign on","authentication","token sync","okta token","okta sync","onedrive okta","office apps okta","credential manager","entra id","okta password","okta not working","re-authenticate","okta hybrid"] },
+                { id:43, category:"it-sop", question:"How do I use GitHub Copilot Agent in the browser?", answer:"The GitHub Copilot Agent SOP covers setting up and using GitHub Copilot in the browser for code assistance, code review, and AI-powered development workflows.",                              tags:["github copilot","copilot agent","github ai","copilot browser","github copilot agent","code ai","ai coding","github ai agent","copilot coding","gh copilot"] },
+
+                // ── Winget & Software ────────────────────────────────────────
+                { id:44, category:"winget", question:"How do I check for and install all software updates with winget?",
+                  answer:"Run winget upgrade to see what's outdated, then upgrade all at once.\n• winget upgrade --include-unknown — lists everything with a newer version\n• winget upgrade --all --include-unknown — upgrades everything\n• winget upgrade --id [PackageID] — upgrades one specific app\nAlways review the list before upgrading all.",
+                  tags:["winget update","winget upgrade","check for updates","update all software","software updates","winget all","upgrade all","check versions","software version","update apps","winget check"] },
+                { id:45, category:"winget", question:"How do I search for and install a package with winget?",
+                  answer:"Search first to get the exact package ID, then install. Use --silent for deployment with no prompts.\n• winget search [name] — find the package\n• winget install --id [ID] — install interactively\n• winget install --id [ID] --silent --accept-source-agreements --accept-package-agreements — deploy silently",
+                  tags:["winget install","winget search","install software","install app","deploy software","winget package","find software","install program","winget id","silent install","winget deploy"] },
+                { id:46, category:"winget", question:"What winget packages are essential for IT help desk?",
+                  answer:"Key IT tools available via winget:\n• Anydesk.Anydesk — remote support\n• Malwarebytes.Malwarebytes — malware removal\n• CrystalDewWorld.CrystalDiskInfo — drive health\n• REALiX.HWiNFO — hardware diagnostics\n• 7zip.7zip — file extraction\n• Notepad++.Notepad++ — text editor\n• Google.Chrome — browser\n• Zoom.Zoom — video conferencing\n• JamSoftware.TreeSize.Free — disk space analysis",
+                  tags:["winget it tools","it software","help desk software","remote support","winget list","essential software","it packages","technician tools","repair tools","winget recommendations","it toolkit"] },
+                { id:47, category:"winget", question:"How do I install AnyDesk for remote support via winget?",
+                  answer:"AnyDesk is the primary remote support tool. Install silently for quick deployment to client machines.\n• winget install --id Anydesk.Anydesk --silent --accept-package-agreements\n• winget upgrade --id Anydesk.Anydesk — keep it current",
+                  tags:["anydesk","remote support","remote desktop","winget anydesk","install anydesk","remote access","remote control","anydesk install","anydesk winget","remote help tool"] },
+                { id:48, category:"winget", question:"How do I install Malwarebytes for malware removal via winget?",
+                  answer:"Malwarebytes is the go-to for malware scans and removal on client machines.\n• winget install --id Malwarebytes.Malwarebytes --silent --accept-package-agreements\n• winget upgrade --id Malwarebytes.Malwarebytes — keep definitions current",
+                  tags:["malwarebytes","malware removal","virus removal","antivirus","winget malwarebytes","install malwarebytes","malware scan","virus scan","mbam","malware tool"] },
+                { id:49, category:"winget", question:"How do I check drive health with CrystalDiskInfo via winget?",
+                  answer:"CrystalDiskInfo reads SMART data to show drive health. Green = good, yellow = caution, red = replace.\n• winget install --id CrystalDewWorld.CrystalDiskInfo --silent --accept-package-agreements\nLaunch and look for anything not showing Good — backup immediately if yellow or red.",
+                  tags:["crystaldiskinfo","disk health","drive health","smart data","hard drive check","ssd health","drive check","disk info","crystaldisk","hdd check","drive diagnostic","smart check"] },
+                { id:50, category:"winget", question:"How do I export and import a winget package list for deployment?",
+                  answer:"Export your software stack as JSON, then import it on any machine — great for standardizing a tech setup.\n• winget export -o winget-packages.json — exports all installed apps\n• winget import -i winget-packages.json --accept-package-agreements --accept-source-agreements — installs from the list on a new machine",
+                  tags:["winget export","winget import","deploy software list","software manifest","winget json","bulk install","software stack","deployment","winget deploy","import packages","winget backup","software list"] },
+                { id:51, category:"winget", question:"How do I query Lansweeper asset data via API with Power Automate?",
+                  answer:"Lansweeper API is scoped to the newsbank.com tenant — direct browser or external calls are blocked by conditional access. Power Automate (running inside the tenant) is the correct pipeline.\n\nPower Automate HTTP action setup:\n• Method: POST\n• URI: https://api.lansweeper.com/api/v2/graphql\n• Headers: Authorization: Token [PAT], Content-Type: application/json\n• Body: GraphQL query (see code edition for full example)\n\nOutput options: SharePoint list, Teams post, Excel file, email report, or chart dashboard.\nMac agents (lsagent) and Windows devices both queryable — filter by assetType.\nClipper role: build and test queries, document field names — Power Automate handles execution inside the tenant.",
+                  tags:["lansweeper api","lansweeper power automate","lansweeper graphql","lansweeper sql","tblassets","lansweeper query","lansweeper reporting","lansweeper mac","lsagent","lansweeper pat","lansweeper data","asset query","lansweeper integration","power automate lansweeper","newsbank","tenant","conditional access","lansweeper chart","asset dashboard","chart"] }
+            ]
+        };
+
+        const { useState, useEffect } = React;
+
+        const ClippyQAApp = () => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('all');
+            const [viewMode, setViewMode] = useState('chat');
+            const [chatMessages, setChatMessages] = useState([]);
+            const [chatInput, setChatInput] = useState('');
+            const [expandedItems, setExpandedItems] = useState({});
+
+            useEffect(() => {
+                setChatMessages([{
+                    type: 'bot',
+                    text: 'Hi! I\'m Clippy. Ask me any question or browse questions below.'
+                }]);
+            }, []);
+
+            const getFilteredItems = () => {
+                let filtered = qaData.qaItems;
+                if (selectedCategory !== 'all') {
+                    filtered = filtered.filter(item => item.category === selectedCategory);
+                }
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    filtered = filtered.filter(item =>
+                        item.question.toLowerCase().includes(term) ||
+                        item.answer.toLowerCase().includes(term) ||
+                        (item.tags && item.tags.some(t => t.includes(term) || term.includes(t)))
+                    );
+                }
+                return filtered;
+            };
+
+            const findAnswer = (userInput) => {
+                const input = userInput.toLowerCase();
+                // Score each item: question match = 3, tag match = 2, answer match = 1
+                let bestMatch = null;
+                let bestScore = 0;
+                qaData.qaItems.forEach(item => {
+                    let score = 0;
+                    if (item.question.toLowerCase().includes(input)) score += 3;
+                    if (item.tags && item.tags.some(t => t.includes(input) || input.includes(t))) score += 2;
+                    if (item.answer.toLowerCase().includes(input)) score += 1;
+                    if (score > bestScore) { bestScore = score; bestMatch = item; }
+                });
+                return bestMatch
+                    ? bestMatch.answer
+                    : "I couldn't find an answer to that. Try keywords like 'quote', 'pricing', '3D print', 'repair', or 'track package' — or browse by category below.";
+            };
+
+            const handleChatSubmit = (e) => {
+                e.preventDefault();
+                if (!chatInput.trim()) return;
+
+                const newMessages = [...chatMessages, { type: 'user', text: chatInput }];
+                const answer = findAnswer(chatInput);
+                newMessages.push({ type: 'bot', text: answer });
+
+                setChatMessages(newMessages);
+                setChatInput('');
+            };
+
+            const toggleExpanded = (id) => {
+                setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
+            };
+
+            const filteredItems = getFilteredItems();
+
+            return (
+                React.createElement('div', { className: 'min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100' },
+                    // Header
+                    React.createElement('header', { className: 'bg-white shadow-md border-b-4 border-indigo-600' },
+                        React.createElement('div', { className: 'max-w-6xl mx-auto px-6 py-4' },
+                            React.createElement('div', { className: 'flex items-center justify-between' },
+                                React.createElement('div', { className: 'flex items-center gap-3' },
+                                    React.createElement('div', { className: 'text-3xl' }, '📎'),
+                                    React.createElement('h1', { className: 'text-3xl font-bold text-indigo-600' }, 'Clippy Q&A')
+                                ),
+                                React.createElement('div', { className: 'flex gap-2' },
+                                    React.createElement('button', {
+                                        onClick: () => setViewMode('chat'),
+                                        className: `flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${viewMode === 'chat' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                                    }, '💬 Chat'),
+                                    React.createElement('button', {
+                                        onClick: () => setViewMode('list'),
+                                        className: `flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                                    }, '📋 Browse')
+                                )
+                            )
+                        )
+                    ),
+
+                    // Main Content
+                    React.createElement('main', { className: 'max-w-6xl mx-auto px-6 py-8' },
+                        // Search Bar
+                        React.createElement('div', { className: 'mb-6' },
+                            React.createElement('div', { className: 'flex items-center gap-2 bg-white px-4 py-3 rounded-lg shadow-md border-2 border-indigo-200' },
+                                React.createElement('span', null, '🔍'),
+                                React.createElement('input', {
+                                    type: 'text',
+                                    placeholder: 'Search questions...',
+                                    value: searchTerm,
+                                    onChange: (e) => setSearchTerm(e.target.value),
+                                    className: 'flex-1 outline-none text-lg'
+                                })
+                            ),
+                            searchTerm && React.createElement('p', { className: 'text-sm text-gray-600 mt-2' }, `Found ${filteredItems.length} result${filteredItems.length !== 1 ? 's' : ''}`)
+                        ),
+
+                        // Category Filter
+                        viewMode === 'list' && React.createElement('div', { className: 'mb-6 flex flex-wrap gap-2' },
+                            React.createElement('button', {
+                                onClick: () => setSelectedCategory('all'),
+                                className: `px-4 py-2 rounded-full transition-all font-medium ${selectedCategory === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border-2 border-indigo-200 hover:border-indigo-600'}`
+                            }, 'All Topics'),
+                            qaData.categories.map(cat =>
+                                React.createElement('button', {
+                                    key: cat.id,
+                                    onClick: () => setSelectedCategory(cat.id),
+                                    className: `px-4 py-2 rounded-full transition-all font-medium ${selectedCategory === cat.id ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border-2 border-indigo-200 hover:border-indigo-600'}`
+                                }, `${cat.icon} ${cat.name}`)
+                            )
+                        ),
+
+                        // Chat or List View
+                        viewMode === 'chat' ? (
+                            React.createElement('div', { className: 'flex flex-col h-[600px] bg-white rounded-lg shadow-lg border-2 border-indigo-200 overflow-hidden' },
+                                React.createElement('div', { className: 'flex-1 overflow-y-auto p-6 space-y-4' },
+                                    chatMessages.map((msg, idx) =>
+                                        React.createElement('div', {
+                                            key: idx,
+                                            className: `flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`
+                                        },
+                                            React.createElement('div', {
+                                                className: `max-w-xs px-4 py-3 rounded-lg ${msg.type === 'user' ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-gray-100 text-gray-800 rounded-bl-none'}`
+                                            }, msg.text)
+                                        )
+                                    )
+                                ),
+                                React.createElement('form', { onSubmit: handleChatSubmit, className: 'border-t-2 border-indigo-200 p-4 bg-gray-50' },
+                                    React.createElement('div', { className: 'flex gap-2' },
+                                        React.createElement('input', {
+                                            type: 'text',
+                                            value: chatInput,
+                                            onChange: (e) => setChatInput(e.target.value),
+                                            placeholder: 'Ask a question...',
+                                            className: 'flex-1 px-4 py-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-600'
+                                        }),
+                                        React.createElement('button', {
+                                            type: 'submit',
+                                            className: 'bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium'
+                                        }, '✉️ Send')
+                                    )
+                                )
+                            )
+                        ) : (
+                            React.createElement('div', { className: 'space-y-3' },
+                                filteredItems.length > 0 ? (
+                                    filteredItems.map(item =>
+                                        React.createElement('div', {
+                                            key: item.id,
+                                            className: 'bg-white rounded-lg shadow-md border-2 border-indigo-200 overflow-hidden hover:shadow-lg transition-shadow'
+                                        },
+                                            React.createElement('button', {
+                                                onClick: () => toggleExpanded(item.id),
+                                                className: 'w-full px-6 py-4 flex items-center justify-between hover:bg-indigo-50 transition-colors'
+                                            },
+                                                React.createElement('div', { className: 'text-left' },
+                                                    React.createElement('p', { className: 'font-semibold text-gray-800 text-lg' }, item.question),
+                                                    React.createElement('p', { className: 'text-sm text-indigo-600 mt-1' }, qaData.categories.find(c => c.id === item.category)?.name)
+                                                ),
+                                                React.createElement('span', { className: 'text-indigo-600 transition-transform' }, expandedItems[item.id] ? '▲' : '▼')
+                                            ),
+                                            expandedItems[item.id] && React.createElement('div', { className: 'border-t-2 border-indigo-200 px-6 py-4 bg-indigo-50' },
+                                                React.createElement('p', { className: 'text-gray-700' }, item.answer)
+                                            )
+                                        )
+                                    )
+                                ) : (
+                                    React.createElement('div', { className: 'text-center py-12' },
+                                        React.createElement('p', { className: 'text-xl text-gray-600' }, 'No questions match your search.'),
+                                        React.createElement('p', { className: 'text-gray-500 mt-2' }, 'Try different keywords or browse by category.')
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(ClippyQAApp));
+    </script>
+</body>
+</html>

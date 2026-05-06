@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clippy Q&A - Code Edition</title>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="module">
+        const { useState, useEffect } = React;
+
+        const ClippyQACodeEdition = () => {
+            // Data state with CODE field added
+            const [categories, setCategories] = useState([
+                { id: "sop",      name: "Service Requests & Quotes", icon: "📋" },
+                { id: "services", name: "Services",                  icon: "⚙️" },
+                { id: "3dprint",  name: "3D Printing",               icon: "🖨️" },
+                { id: "pricing",  name: "Pricing & Payment",         icon: "💳" },
+                { id: "contact",  name: "Contact & Process",         icon: "📞" },
+                { id: "it-sop",  name: "IT SOPs",                    icon: "🗂️" },
+                { id: "winget",  name: "Winget & Software",          icon: "📦" }
+            ]);
+
+            const [qaItems, setQaItems] = useState([
+                { id:1,  category:"sop",      question:"How do I request a service or get a quote?",              answer:"Fill out the Service Request Form on the Services page — go to Services in the nav, scroll to 'Request a Quote', or click 'Get a Quote' in the top menu. Direct link: services.html#invoice. We respond within 24 hours.", keyPhrases:"sop, service order, service request, quote, form, invoice, get a quote, request, order, submit, how to request, service order proposal", description:"How to submit a service request", code:"// Direct link to the quote form\nwindow.location.href = 'services.html#invoice';" },
+                { id:2,  category:"sop",      question:"What is the SOP / service order form?",                   answer:"The SOP (Service Order/Purchase) form — also the Quote Request form — is on the Services page. It collects your name, email, service type, platform, budget, urgency, and project description. We review and reply within 24 hours.", keyPhrases:"sop, what is sop, service order form, service order proposal, quote form, request form, invoice form", description:"What the SOP form is", code:"" },
+                { id:3,  category:"sop",      question:"What information do I need to fill out the request form?", answer:"Name, email (phone optional), service type, platform, urgency, and project description. For builds include budget range. For 3D prints describe what you need and note any design files (STL, OBJ, 3MF).", keyPhrases:"form fields, what to fill out, information needed, required fields, form info", description:"Required form fields", code:"" },
+                { id:4,  category:"sop",      question:"Can I request 3D printing through the service form?",       answer:"Yes — select '3D Printing' from the Service Type dropdown and extra fields appear for material and file status. Or use the dedicated form at 3d-printing.html#request.", keyPhrases:"3d print form, 3d print request, order 3d print, request 3d printing, 3d form, print form", description:"3D printing via service form", code:"// Dedicated 3D print form\nwindow.location.href = '3d-printing.html#request';" },
+                { id:5,  category:"services", question:"What services does Custom Design Systems offer?",           answer:"Remote Tech Support ($85/hr), Custom PC Builds ($95/hr + parts), Computer Repair ($75/hr + parts), and 3D Printing. We support Windows and Mac, serving local and remote clients.", keyPhrases:"services, what do you do, offerings, cds, all services, available", description:"All CDS services", code:"" },
+                { id:6,  category:"services", question:"Do you offer remote tech support?",                        answer:"Yes. Secure AnyDesk remote sessions for virus/malware removal, slow PC fixes, software installs, network troubleshooting, and Windows/macOS issues. Rate: $85/hour.", keyPhrases:"remote support, remote help, tech support, remote tech, online help, anydesk, virus removal, slow pc", description:"Remote tech support", code:"" },
+                { id:7,  category:"services", question:"Do you build custom PCs?",                                 answer:"Yes — gaming rigs, workstations, home servers, media PCs. Free parts consult, expert assembly, OS install, benchmark testing, 30-day labor warranty. Rate: $95/hr + parts. 50% deposit before parts ordered.", keyPhrases:"pc build, custom pc, gaming pc, build a computer, workstation, gaming rig, new pc", description:"Custom PC builds", code:"" },
+                { id:8,  category:"services", question:"Do you repair computers and laptops?",                     answer:"Yes — screen replacements, keyboard/trackpad repair, HDD/SSD replacement, RAM upgrades, overheating fixes, power jack repair, data recovery. On-site or drop-off. Rate: $75/hr + parts.", keyPhrases:"repair, fix computer, broken laptop, screen repair, laptop repair, computer repair, data recovery, ssd", description:"Computer repair", code:"" },
+                { id:9,  category:"services", question:"Do you work on Macs?",                                     answer:"Yes. Remote support covers both Windows and macOS. Hardware repair for Apple devices also available.", keyPhrases:"mac, macos, apple, macbook, mac support, imac, mac repair", description:"Mac support", code:"" },
+                { id:10, category:"services", question:"Do you make on-site visits?",                              answer:"Yes. Travel billed at $0.67/mile + hourly labor rate. Mention location in the request form.", keyPhrases:"on-site, onsite, in person, local, visit, travel, in home, house call", description:"On-site visits", code:"" },
+                { id:11, category:"pricing",  question:"How much does remote tech support cost?",                  answer:"$85/hour. Most jobs 1–2 hours. Billed after session — no upfront payment for remote work.", keyPhrases:"remote support price, cost of remote, how much remote, tech support cost, $85, hourly rate", description:"Remote support pricing", code:"" },
+                { id:12, category:"pricing",  question:"How much does a custom PC build cost?",                    answer:"$95/hr labor + parts. Budget gaming PC: $380–$570 (4–6hrs), mid-range workstation: $475–$665 (5–7hrs), high-end rig: $570–$760 (6–8hrs). 50% deposit required.", keyPhrases:"build cost, pc build price, gaming pc cost, $95, parts cost, build price", description:"PC build pricing", code:"" },
+                { id:13, category:"pricing",  question:"How much does computer repair cost?",                      answer:"$75/hr + parts. Screen replacement: $75–$150, SSD upgrade: $75–$150, RAM upgrade: $38–$75. All itemized on invoice.", keyPhrases:"repair cost, repair price, screen replacement price, fix price, $75, repair pricing", description:"Repair pricing", code:"" },
+                { id:14, category:"pricing",  question:"How do I pay? What payment methods are accepted?",          answer:"Venmo (@CustomDesignSystems), Zelle, PayPal (invoice), check (payable to Custom Design Systems). Remote billed after session. Builds: 50% deposit upfront. Repairs billed on completion.", keyPhrases:"payment, how to pay, pay, venmo, zelle, paypal, check, payment method, billing", description:"Payment methods", code:"" },
+                { id:15, category:"pricing",  question:"Is there a deposit for PC builds?",                        answer:"Yes — 50% labor deposit required before parts are ordered. Remaining balance due on delivery.", keyPhrases:"deposit, down payment, upfront payment, build deposit, 50 percent, pay upfront", description:"Build deposit policy", code:"" },
+                { id:16, category:"3dprint",  question:"Do you offer 3D printing services?",                      answer:"Yes! Functional parts, prototypes, hobby miniatures, tabletop terrain, custom decor, and desk accessories. Visit 3d-printing.html for the full catalog, pricing, and request form.", keyPhrases:"3d printing, 3d print, print, 3d, printing service, can you print, do you print, 3d printer, 3d shop", description:"3D printing overview", code:"// Go to the 3D printing page\nwindow.location.href = '3d-printing.html';" },
+                { id:17, category:"3dprint",  question:"What 3D printing materials do you use?",                   answer:"PLA (display/decorative), PETG (strong/functional), ABS (heat resistant), TPU (flexible/rubber-like). Specialty filaments like silk, wood-fill, glow-in-the-dark available on request.", keyPhrases:"material, filament, pla, petg, abs, tpu, printing material, silk, flexible, filament type", description:"3D print materials", code:"" },
+                { id:18, category:"3dprint",  question:"Do you have pre-made template models I can order?",        answer:"Yes! Cable clips ($8), PC fan filters ($6), headphone stands ($18), dice towers ($22), miniature bases ($12), nameplates ($15), and more. See the Template Model Shop on the 3D Printing page.", keyPhrases:"template models, pre-made, ready to order, models, 3d shop, catalog, shop, available models, model shop", description:"Template model shop", code:"// Go to the model shop\nwindow.location.href = '3d-printing.html#models';" },
+                { id:19, category:"3dprint",  question:"How do I request a custom 3D print?",                     answer:"Fill out the print request form at 3d-printing.html#request. Describe what you need, pick a material, note any design files (STL/OBJ/3MF). We quote within 24 hours.", keyPhrases:"request 3d print, custom print, order print, how to get a print, 3d print request, print order, 3d print form", description:"Custom 3D print request", code:"// Go to the 3D print request form\nwindow.location.href = '3d-printing.html#request';" },
+                { id:20, category:"3dprint",  question:"How much does 3D printing cost?",                         answer:"From $5 for small parts. Examples: cable clips $8, fan filters $6, headphone stand $18, dice tower $22, nameplate $15, cable box $28. Custom pieces quoted individually.", keyPhrases:"3d print cost, 3d print price, how much print, print rate, 3d pricing, print price", description:"3D print pricing", code:"" },
+                { id:21, category:"contact",  question:"How quickly do you respond to requests?",                  answer:"Within 24 hours for all requests. For urgent matters, select 'Urgent — ASAP' in the urgency field.", keyPhrases:"response time, how fast, how long, when will you reply, turnaround, 24 hours, quick response", description:"Response time", code:"" },
+                { id:22, category:"contact",  question:"How does the service process work?",                       answer:"1. Submit request via the quote form. 2. We respond within 24hrs with a quote. 3. You approve. 4. Work is completed, you're kept updated. 5. Itemized invoice sent.", keyPhrases:"how does it work, process, steps, how to get started, workflow, service process, what happens", description:"Service process", code:"" },
+                { id:23, category:"contact",  question:"How do I track a package?",                               answer:"Use the Package Tracker at package-tracker.html — enter any tracking number, carrier auto-detected (UPS, USPS, FedEx, DHL, Airways, Amazon). Includes history and labeling.", keyPhrases:"track package, tracking, track shipment, where is my package, ups, usps, fedex, dhl, amazon, airways, shipping", description:"Package tracking", code:"// Open package tracker\nwindow.location.href = 'package-tracker.html';" },
+                // ── IT SOPs ─────────────────────────────────────────────────
+                { id:24, category:"it-sop", question:"How do I manage web browsers for users?",           answer:"The Web Browser Management SOP covers resetting browser settings, clearing cache and cookies, managing extensions, configuring proxy settings, and troubleshooting browser performance.",     keyPhrases:"browser, web browser, chrome, firefox, edge, browser management, reset browser, clear cache, clear cookies, browser extensions, proxy, browser performance, browser settings, browser fix", description:"Web browser management SOP", code:"// Open SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/web-browser-management.html');" },
+                { id:25, category:"it-sop", question:"How do I set up or troubleshoot email?",            answer:"The Email / Mail Setup SOP covers configuring Outlook and webmail clients, fixing send/receive errors, setting up email signatures, managing mailbox quotas, and resolving sync issues.",      keyPhrases:"email, mail, outlook, mail setup, email setup, exchange, troubleshoot email, email signature, mailbox, sync email, send receive error, email not working, inbox, email config", description:"Email setup and troubleshooting SOP", code:"// Open SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/email-setup.html');" },
+                { id:26, category:"it-sop", question:"How do I set up or troubleshoot printers?",         answer:"The Printer Setup SOP covers adding local and network printers, installing drivers, clearing print queues, troubleshooting offline status, and configuring default print settings.",           keyPhrases:"printer, printers, print, printer setup, add printer, printer troubleshoot, print queue, offline printer, default printer, driver, install printer, printer not working, clear queue", description:"Printer setup and troubleshooting SOP", code:"// Open SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/printer-setup.html');" },
+                { id:27, category:"it-sop", question:"How do I manage drives and storage?",               answer:"The Drive Management SOP covers mapping network drives, managing disk partitions, checking drive health with SMART tools, running CHKDSK, cleaning up disk space, and resolving drive letter conflicts.", keyPhrases:"drive, storage, disk, network drive, map drive, disk management, chkdsk, smart, drive letter, disk partition, free up space, drive health, disk cleanup", description:"Drive management SOP", code:"// Check drive health (PowerShell)\nGet-Disk | Select-Object Number, FriendlyName, HealthStatus, Size" },
+                { id:28, category:"it-sop", question:"How do I manage Windows Updates?",                  answer:"The Windows Updates SOP covers forcing update checks, troubleshooting stuck updates, managing updates via Group Policy, pausing and resuming updates, and clearing the Windows Update cache.", keyPhrases:"windows update, update, updates, windows updates, update stuck, force update, check updates, wuauserv, update cache, windows 11 update, kb update, patch, wsus", description:"Windows Updates SOP", code:"// Force Windows Update check\nusoclient StartScan\n// Reset update service\nnet stop wuauserv && net start wuauserv" },
+                { id:29, category:"it-sop", question:"What are common help desk tasks?",                  answer:"The Help Desk Tasks SOP covers password resets, account lockouts, remote desktop setup, software installs, user onboarding, and procedures for recurring IT issues.",                           keyPhrases:"help desk, password reset, account lockout, remote desktop, helpdesk, common tasks, user reset, locked out, unlock account, it tasks, desktop support, tier 1, rdp", description:"Common help desk tasks SOP", code:"// Unlock AD account (PowerShell)\nUnlock-ADAccount -Identity username\n// Reset password\nSet-ADAccountPassword -Identity username -Reset" },
+                { id:30, category:"it-sop", question:"How do I use Claude AI for IT tasks?",              answer:"The Claude AI & CoWork SOP covers using Claude AI to draft responses, summarize tickets, write documentation, handle software installs, user onboarding, and internal workflow documentation.", keyPhrases:"claude, ai, claude ai, cowork, ai tools, ai assistant, anthropic, draft response, summarize, ai help desk, claude cowork, ai documentation, ai tickets", description:"Claude AI & CoWork SOP", code:"// Open Claude AI & CoWork SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/claude-ai-cowork.html');" },
+                { id:31, category:"it-sop", question:"How do I use Microsoft Copilot?",                   answer:"The Microsoft Copilot SOP covers enabling and using Microsoft Copilot across M365 apps — generating content in Word/Outlook, using Copilot in Teams meetings, managing Copilot licensing, and handling policies.",  keyPhrases:"copilot, microsoft copilot, m365 copilot, copilot ai, ai copilot, ms copilot, co-pilot, microsoft ai, word copilot, excel copilot, teams copilot, outlook copilot, 365 copilot, m365 ai, copilot license, copilot setup", description:"Microsoft Copilot SOP", code:"// Open Microsoft Copilot SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/microsoft-copilot.html');" },
+                { id:32, category:"it-sop", question:"How do I use Power Automate?",                      answer:"The Power Automate SOP covers creating automated workflows, building approval flows, connecting apps and services, managing Copilot licensing, and troubleshooting flow permissions.",             keyPhrases:"power automate, automation, flow, automate, workflow, power automate flow, automated flow, approval flow, power platform, automate task, scheduled flow, pa flow", description:"Power Automate SOP", code:"// Open Power Automate SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/power-automate.html');" },
+                { id:33, category:"it-sop", question:"How do I manage Office 365 apps?",                  answer:"The Office Apps SOP covers installing and activating Microsoft 365, troubleshooting activation errors, managing OneDrive sync, configuring app updates, and handling licensing.",                keyPhrases:"office, office 365, microsoft 365, m365, office apps, word, excel, powerpoint, onenote, office install, activate office, office license, microsoft office, 365 apps, office activation", description:"Office 365 apps SOP", code:"// Repair Office (run as admin)\n# winget install --id Microsoft.Office\ncscript ospp.vbs /dstatus" },
+                { id:34, category:"it-sop", question:"How do I set up or troubleshoot Microsoft Teams?",  answer:"The Microsoft Teams SOP covers setting up Teams for new users, troubleshooting audio/video, managing guest access, configuring channels and permissions, fixing sign-in issues, and managing meeting policies.", keyPhrases:"teams, microsoft teams, chat, video call, teams meeting, teams channel, teams audio, screen share, teams troubleshoot, sign into teams, teams sign in, teams not working, guest access, teams setup", description:"Microsoft Teams SOP", code:"// Clear Teams cache (PowerShell)\nStop-Process -Name Teams -Force\nRemove-Item \"$env:APPDATA\\Microsoft\\Teams\\*\" -Recurse -Force" },
+                { id:35, category:"it-sop", question:"How do I set up the 8x8 phone system?",            answer:"The 8x8 Phone System SOP covers provisioning extensions, configuring voicemail and call forwarding, troubleshooting softphone issues, managing ring groups, and onboarding new users to the VoIP platform.", keyPhrases:"8x8, phone, voip, phone system, 8x8 phone, softphone, extension, voicemail, call forwarding, ring group, 8x8 setup, 8x8 troubleshoot, 8x8 extension, 8x8 voip", description:"8x8 Phone System SOP", code:"// Install 8x8 Work via winget\nwinget install --id 8x8.8x8Work" },
+                { id:36, category:"it-sop", question:"How do I install and configure Zoom?",              answer:"The Zoom SOP covers installing and configuring Zoom, troubleshooting audio/video and screen share issues, managing Zoom licenses, setting up webinars, and configuring SSO and admin settings.",   keyPhrases:"zoom, zoom meeting, video conferencing, zoom call, zoom setup, zoom audio, zoom video, screen share zoom, zoom sso, zoom admin, zoom troubleshoot, zoom install, zoom not working, zoom license", description:"Zoom SOP", code:"// Install Zoom via winget\nwinget install --id Zoom.Zoom\n// Update Zoom\nwinget upgrade --id Zoom.Zoom" },
+                { id:37, category:"it-sop", question:"How do I deploy printers via print server?",        answer:"The Printers & Print Servers SOP covers deploying printers via print server, configuring IP printers, installing PCL/PS drivers, troubleshooting spooler crashes, and managing printer permissions and shared queues.", keyPhrases:"print server, printer server, ip printer, pcl, ps driver, print server setup, deploy printer, shared printer, tcp/ip printer, spooler, printer spooler, print spooler crash, network printer", description:"Printers & print servers SOP", code:"// Restart print spooler\nRestart-Service -Name Spooler\n// Add network printer\nAdd-Printer -ConnectionName '\\\\printserver\\PrinterName'" },
+                { id:38, category:"it-sop", question:"How do I activate an AT&T wireless device?",        answer:"The AT&T Wireless Activation SOP covers activating new SIM cards, transferring lines, setting up mobile devices for corporate use, and managing AT&T wireless accounts.",                       keyPhrases:"att, at&t, wireless, mobile, activation, sim, at&t activation, wireless activation, mobile device, imei, carrier activation, new phone setup, att wireless", description:"AT&T wireless activation SOP", code:"// Open SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/att-wireless-activation.html');" },
+                { id:39, category:"it-sop", question:"What is the new hire IT checklist?",                answer:"The New Hire IT Checklist covers account creation, UPN setup, group memberships, Intune MDM device enrollment, Lansweeper registration, software installs, and all onboarding steps for a new employee's first day.", keyPhrases:"new hire, onboarding, new employee, setup new user, new user, new hire checklist, user setup, create account, new account, upn, enroll device, intune, first day setup, onboard user, new hire it", description:"New hire IT checklist SOP", code:"// Open New Hire SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/new-hire-checklist.html');" },
+                { id:40, category:"it-sop", question:"What is the departing employee IT checklist?",      answer:"The Departing Employee SOP covers disabling accounts, forwarding email to a manager, remote wiping devices via Intune, equipment return, removing licenses, and all steps for a clean employee exit.",  keyPhrases:"offboarding, departing employee, termination, exit checklist, remove user, disable account, equipment return, remote wipe, forward email, offboard user, employee exit, terminated user, departure checklist", description:"Departing employee IT checklist SOP", code:"// Disable AD account\nDisable-ADAccount -Identity username\n// Open Offboarding SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/departing-employee-checklist.html');" },
+                { id:41, category:"it-sop", question:"How do I use Lansweeper for asset management?",     answer:"Lansweeper scans and inventories all assets including Mac (via lsagent) and Windows devices.\nKey points for newsbank.com tenant:\n• API is tenant-scoped — calls only work from inside the tenant\n• Power Automate (inside tenant) is the correct data pipeline — already authenticated\n• Browser or external PowerShell calls will be rejected by conditional access\n• Clippy helps you build GraphQL queries and understand field names\n• Data flows: Lansweeper → Power Automate → SharePoint / Teams / Excel / report\nSOP: lansweeper.html",                              keyPhrases:"lansweeper, asset management, inventory, graphql, lsagent, lansweeper agent, asset scan, device inventory, lansweeper api, network scan, it asset, asset report, lansweeper reporting, power automate lansweeper, newsbank, tenant, conditional access", description:"Lansweeper asset management SOP", code:"// Open Lansweeper SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/lansweeper.html');" },
+                { id:42, category:"it-sop", question:"How do I fix Okta authentication issues?",          answer:"The Okta SOP covers token sync after password changes, fixing OneDrive sync crashes, re-authenticating Office apps, clearing Windows Credential Manager, and resolving Hybrid Entra ID token issues.", keyPhrases:"okta, sso, single sign on, authentication, token sync, okta token, okta sync, onedrive okta, office apps okta, credential manager, entra id, okta password, okta not working, re-authenticate, okta hybrid", description:"Okta authentication SOP", code:"// Clear Windows Credential Manager entries\n$creds = cmdkey /list | Select-String 'okta'\n// Open Okta SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/okta.html');" },
+                { id:43, category:"it-sop", question:"How do I use GitHub Copilot Agent in the browser?", answer:"The GitHub Copilot Agent SOP covers setting up and using GitHub Copilot in the browser for code assistance, code review, and AI-powered development workflows.",                              keyPhrases:"github copilot, copilot agent, github ai, copilot browser, github copilot agent, code ai, ai coding, github ai agent, copilot coding, gh copilot", description:"GitHub Copilot Agent SOP", code:"// Open GitHub Copilot Agent SOP\nwindow.open('https://greenhornet-dev.github.io/SOP-IT-Help/github-copilot-agent.html');" },
+                // ── Winget & Software ────────────────────────────────────────
+                { id:44, category:"winget", question:"How do I check for and install all software updates with winget?",   answer:"Run winget upgrade to see what's outdated, then upgrade all at once.\n• winget upgrade --include-unknown — lists everything with a newer version\n• winget upgrade --all --include-unknown — upgrades everything\n• winget upgrade --id [PackageID] — upgrades one specific app\nAlways review the list before upgrading all.", keyPhrases:"winget update, winget upgrade, check for updates, update all software, software updates, winget all, upgrade all, check versions, software version, update apps, winget check", description:"Check and upgrade all software via winget", code:"// See all upgradable packages\nwinget upgrade --include-unknown\n\n// Upgrade everything at once\nwinget upgrade --all --include-unknown\n\n// Upgrade one app\nwinget upgrade --id Google.Chrome" },
+                { id:45, category:"winget", question:"How do I search for and install a package with winget?",             answer:"Search first to get the exact package ID, then install. Use --silent for deployment with no prompts.\n• winget search [name] — find the package\n• winget install --id [ID] — install interactively\n• winget install --id [ID] --silent --accept-source-agreements --accept-package-agreements — deploy silently", keyPhrases:"winget install, winget search, install software, install app, deploy software, winget package, find software, install program, winget id, silent install, winget deploy", description:"Search and install packages with winget", code:"// Search for a package\nwinget search chrome\n\n// Install interactively\nwinget install --id Google.Chrome\n\n// Install silently (no prompts — for deployment)\nwinget install --id Google.Chrome --silent --accept-source-agreements --accept-package-agreements" },
+                { id:46, category:"winget", question:"What winget packages are essential for IT help desk?",               answer:"Key IT tools available via winget:\n• Anydesk.Anydesk — remote support\n• Malwarebytes.Malwarebytes — malware removal\n• CrystalDewWorld.CrystalDiskInfo — drive health\n• REALiX.HWiNFO — hardware diagnostics\n• 7zip.7zip — file extraction\n• Notepad++.Notepad++ — text editor\n• Google.Chrome — browser\n• Zoom.Zoom — video conferencing\n• JamSoftware.TreeSize.Free — disk space analysis", keyPhrases:"winget it tools, it software, help desk software, remote support, winget list, essential software, it packages, technician tools, repair tools, winget recommendations, it toolkit", description:"Essential IT help desk winget packages", code:"// Install all IT essentials silently\nwinget install --id Anydesk.Anydesk --silent --accept-package-agreements\nwinget install --id Malwarebytes.Malwarebytes --silent --accept-package-agreements\nwinget install --id CrystalDewWorld.CrystalDiskInfo --silent --accept-package-agreements\nwinget install --id REALiX.HWiNFO --silent --accept-package-agreements\nwinget install --id 7zip.7zip --silent --accept-package-agreements\nwinget install --id Notepad++.Notepad++ --silent --accept-package-agreements\nwinget install --id JamSoftware.TreeSize.Free --silent --accept-package-agreements" },
+                { id:47, category:"winget", question:"How do I install AnyDesk for remote support via winget?",            answer:"AnyDesk is the primary remote support tool. Install silently for quick deployment to client machines.", keyPhrases:"anydesk, remote support, remote desktop, winget anydesk, install anydesk, remote access, remote control, anydesk install, anydesk winget, remote help tool", description:"Install AnyDesk via winget", code:"// Install AnyDesk\nwinget install --id Anydesk.Anydesk --silent --accept-package-agreements\n\n// Update AnyDesk\nwinget upgrade --id Anydesk.Anydesk" },
+                { id:48, category:"winget", question:"How do I install Malwarebytes for malware removal via winget?",      answer:"Malwarebytes is the go-to for malware removal on client machines. Keep it updated so definitions stay current.", keyPhrases:"malwarebytes, malware removal, virus removal, antivirus, winget malwarebytes, install malwarebytes, malware scan, virus scan, mbam, malware tool", description:"Install Malwarebytes via winget", code:"// Install Malwarebytes\nwinget install --id Malwarebytes.Malwarebytes --silent --accept-package-agreements\n\n// Update Malwarebytes\nwinget upgrade --id Malwarebytes.Malwarebytes" },
+                { id:49, category:"winget", question:"How do I check drive health with CrystalDiskInfo via winget?",       answer:"CrystalDiskInfo reads SMART data — Green = good, yellow = caution, red = replace immediately. Backup before anything if yellow or red.", keyPhrases:"crystaldiskinfo, disk health, drive health, smart data, hard drive check, ssd health, drive check, disk info, crystaldisk, hdd check, drive diagnostic, smart check", description:"Check drive health with CrystalDiskInfo", code:"// Install CrystalDiskInfo\nwinget install --id CrystalDewWorld.CrystalDiskInfo --silent --accept-package-agreements\n\n// Launch after install\nStart-Process \"$env:ProgramFiles\\CrystalDiskInfo\\DiskInfo64.exe\"" },
+                { id:50, category:"winget", question:"How do I export and import a winget package list for deployment?",   answer:"Export your full installed software list as JSON, then import it on another machine — great for standardizing a software stack across a team or rebuilding a machine.", keyPhrases:"winget export, winget import, deploy software list, software manifest, winget json, bulk install, software stack, deployment, winget deploy, import packages, winget backup, software list", description:"Export and import winget package lists", code:"// Export all installed packages to JSON\nwinget export -o winget-packages.json\n\n// Import and install from file on a new machine\nwinget import -i winget-packages.json --accept-package-agreements --accept-source-agreements\n\n// Useful for: new hire setup, machine rebuild, standard software stack" },
+                { id:52, category:"winget", question:"How do I handle passwords, tokens, and API keys securely in scripts?", answer:"Use Secure-Prompt-Helper.ps1 — prompts for sensitive data at runtime, never writes to disk or files. Dot-source it into any script that needs a token, password, or admin credential.", keyPhrases:"secure prompt, api key, token, pat, password, credentials, admin password, secure input, hide token, secure script, sensitive data, obscure key, security, read-host, secure string, paste token, runtime prompt", description:"Secure runtime prompts for tokens, passwords, and API keys", code:"# ── Dot-source the helper into any script ──────────────────\n. .\\Secure-Prompt-Helper.ps1\n\n# Prompt for a token — masked, not stored\n$PAT = Get-SecureInput '🔐 Paste API Token'\n\n# Prompt for a password — asterisks, not stored\n$Pass = Get-SecureInput '🔐 Admin Password' -IsPassword\n\n# Require admin elevation (exits if not elevated)\nAssert-Admin\n\n# ... your script logic using $PAT / $Pass ...\n\n# Clear from session when done\nClear-SensitiveVars 'PAT','Pass'" },
+                { id:53, category:"winget", question:"What are the Lansweeper SQL database tables?", answer:"Lansweeper on-premise uses SQL Server. Main tables:\n• tblAssets — core asset data (name, IP, type, lastSeen)\n• tblAssetCustom — extended fields (serial number, warranty, location, purchase date)\n• tblSoftware — installed software per asset\n• tblAssetGroups — group memberships\n• htbl* prefix — helpdesk/ticketing data\nJoin tblAssets + tblAssetCustom on AssetID for full asset records.\nCloud Lansweeper: use GraphQL API instead (no direct SQL).", keyPhrases:"lansweeper tables, tblassets, tblassetcustom, lansweeper sql tables, sql table names, lansweeper database tables, tblsoftware, tblassetgroups, htbl, lansweeper schema, asset table, custom table, serial number table, warranty table, location table", description:"Lansweeper SQL database table reference", code:"-- Full asset record: tblAssets + tblAssetCustom\nSELECT\n    a.AssetName,\n    a.IPAddress,\n    a.Assettype,\n    a.LastSeen,\n    c.Serialnumber,\n    c.Warrantydate,\n    c.Location,\n    c.PurchaseDate,\n    c.Purchaseprice\nFROM tblAssets a\nJOIN tblAssetCustom c ON a.AssetID = c.AssetID\nWHERE a.Assettype = 1  -- 1 = Windows, 4 = Linux, 5 = Mac\nORDER BY a.LastSeen DESC\n\n-- Installed software for an asset\nSELECT s.softwareName, s.softwareVersion\nFROM tblSoftware s\nJOIN tblAssets a ON s.AssetID = a.AssetID\nWHERE a.AssetName = 'COMPUTER-NAME'\nORDER BY s.softwareName" },
+                { id:51, category:"winget", question:"How do I query Lansweeper asset data via API with Power Automate?",  answer:"Lansweeper API is scoped to the newsbank.com tenant — direct browser or external calls are blocked by conditional access. Power Automate (running inside the tenant) is the correct pipeline.\n\nPower Automate HTTP action setup:\n• Method: POST\n• URI: https://api.lansweeper.com/api/v2/graphql\n• Headers: Authorization: Token [PAT], Content-Type: application/json\n• Body: GraphQL query (see code edition for full example)\n\nOutput options: SharePoint list, Teams post, Excel file, email report, or chart dashboard.\nMac agents (lsagent) and Windows devices both queryable — filter by assetType.\nClipper role: build and test queries, document field names — Power Automate handles execution inside the tenant.", keyPhrases:"lansweeper api, lansweeper power automate, lansweeper graphql, lansweeper sql, tblassets, lansweeper query, lansweeper reporting, lansweeper mac, lsagent, lansweeper pat, lansweeper data, asset query, lansweeper integration, power automate lansweeper, newsbank, tenant, conditional access, lansweeper chart, asset dashboard, chart, mac assets lansweeper", description:"Lansweeper API + Power Automate for asset reporting", code:"# ── Lansweeper API Query (PowerShell) ──────────────────────\n# Sensitive values prompted at runtime — never stored in script\n\n$PAT    = Read-Host -Prompt '🔐 Lansweeper PAT Token'\n$SiteId = Read-Host -Prompt '🔐 Lansweeper Site ID'\n\n$headers = @{\n    'Authorization' = \"Token $PAT\"\n    'Content-Type'  = 'application/json'\n}\n\n$query = @'\n{\n  \"query\": \"{ site(id: \\\"SITE_ID\\\") { assetResources(pagination: { limit: 100 }) { items { assetBasicInfo { name ipAddress fqdn userDomain } operatingSystem { caption } } } } }\"\n}\n'@ -replace 'SITE_ID', $SiteId\n\n$response = Invoke-RestMethod -Uri 'https://api.lansweeper.com/api/v2/graphql' `\n    -Method POST -Headers $headers -Body $query\n\n$response.data.site.assetResources.items | Format-Table\n\n# Clear sensitive vars from session when done\nRemove-Variable PAT, SiteId -ErrorAction SilentlyContinue" }
+            ]);
+
+            // UI state
+            const [viewMode, setViewMode] = useState('chat');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('all');
+            const [chatMessages, setChatMessages] = useState([]);
+            const [chatInput, setChatInput] = useState('');
+            const [expandedItems, setExpandedItems] = useState({});
+            const [copiedId, setCopiedId] = useState(null);
+            const [copiedChatId, setCopiedChatId] = useState(null);
+
+            // Form states
+            const [newCategory, setNewCategory] = useState({ name: '', icon: '' });
+            const [newQA, setNewQA] = useState({
+                question: '',
+                answer: '',
+                description: '',
+                keyPhrases: '',
+                code: '',
+                category: categories[0]?.id || 'general'
+            });
+            const [nextId, setNextId] = useState(54);
+
+            // Initialize chat
+            useEffect(() => {
+                setChatMessages([{
+                    type: 'bot',
+                    text: 'Hi! I\'m Clippy. Ask me questions or browse Q&A with code snippets.'
+                }]);
+            }, []);
+
+            // Filter items
+            const getFilteredItems = () => {
+                let filtered = qaItems;
+                if (selectedCategory !== 'all') {
+                    filtered = filtered.filter(item => item.category === selectedCategory);
+                }
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    filtered = filtered.filter(item =>
+                        item.question.toLowerCase().includes(term) ||
+                        item.answer.toLowerCase().includes(term) ||
+                        item.description.toLowerCase().includes(term) ||
+                        (item.keyPhrases && item.keyPhrases.toLowerCase().includes(term)) ||
+                        (item.code && item.code.toLowerCase().includes(term))
+                    );
+                }
+                return filtered;
+            };
+
+            // Find answer
+            const findAnswer = (userInput) => {
+                const input = userInput.toLowerCase();
+                let bestMatch = null;
+                let bestScore = 0;
+
+                qaItems.forEach(item => {
+                    let score = 0;
+                    if (item.question.toLowerCase().includes(input)) score += 3;
+                    if (item.keyPhrases && item.keyPhrases.toLowerCase().includes(input)) score += 2;
+                    if (item.code && item.code.toLowerCase().includes(input)) score += 2;
+                    if (item.description.toLowerCase().includes(input)) score += 1;
+                    if (item.answer.toLowerCase().includes(input)) score += 1;
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMatch = item;
+                    }
+                });
+
+                return bestMatch ? bestMatch.answer : "I couldn't find an answer to that question.";
+            };
+
+            // ── Lansweeper live query ─────────────────────────────────
+            const handleLansweeperQuery = async (userText) => {
+                // PAT prompted every time — never stored anywhere
+                const pat = window.prompt('🔐 Lansweeper PAT Token\n(prompted each time — never stored in code or browser)');
+                if (!pat || !pat.trim()) {
+                    setChatMessages(prev => [...prev,
+                        { type: 'user', text: userText },
+                        { type: 'bot', text: 'Query cancelled — no PAT entered.' }
+                    ]);
+                    return;
+                }
+
+                // Site ID stored in sessionStorage only (clears when tab closes)
+                let siteId = sessionStorage.getItem('ls_site_id');
+                if (!siteId) {
+                    siteId = window.prompt('🔐 Lansweeper Site ID\n(saved for this browser session only — clears when tab closes)');
+                    if (!siteId || !siteId.trim()) {
+                        setChatMessages(prev => [...prev,
+                            { type: 'user', text: userText },
+                            { type: 'bot', text: 'Query cancelled — no Site ID entered.' }
+                        ]);
+                        return;
+                    }
+                    sessionStorage.setItem('ls_site_id', siteId.trim());
+                }
+
+                setChatMessages(prev => [...prev,
+                    { type: 'user', text: userText },
+                    { type: 'bot', text: '⏳ Querying Lansweeper assets...' }
+                ]);
+
+                try {
+                    const gql = `{ site(id: "${siteId.trim()}") { assetResources(pagination: { limit: 50 }) { items { assetBasicInfo { name ipAddress type userDomain fqdn } operatingSystem { caption } assetCustom { serialNumber warrantyDate location } } } } }`;
+
+                    const res = await fetch('https://api.lansweeper.com/api/v2/graphql', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Token ${pat.trim()}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ query: gql })
+                    });
+
+                    if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+                    const json = await res.json();
+                    if (json.errors) throw new Error(json.errors[0].message);
+
+                    const items = json?.data?.site?.assetResources?.items || [];
+                    const result = items.length > 0
+                        ? `✅ ${items.length} assets found:\n\n` + items.map(a => {
+                            const b = a.assetBasicInfo;
+                            const os = a.operatingSystem?.caption || '—';
+                            const c = a.assetCustom || {};
+                            return `• ${b.name}  |  ${b.ipAddress || 'no IP'}  |  ${os}` +
+                                (c.location ? `  |  📍 ${c.location}` : '') +
+                                (c.serialNumber ? `  |  S/N: ${c.serialNumber}` : '');
+                          }).join('\n')
+                        : '⚠️ No assets returned. Verify your Site ID and PAT has read permissions.';
+
+                    setChatMessages(prev => [...prev.slice(0, -1), { type: 'bot', text: result }]);
+                } catch (err) {
+                    const isCors = err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('CORS');
+                    const psScript = `# ── Lansweeper Asset Query (PowerShell) ────────────────────\n` +
+                        `. .\\Secure-Prompt-Helper.ps1\n\n` +
+                        `$PAT    = Get-SecureInput '🔐 Lansweeper PAT Token'\n` +
+                        `$SiteId = Get-SecureInput '🔐 Lansweeper Site ID'\n\n` +
+                        `$body = @{ query = "{ site(id: \\"$SiteId\\") { assetResources(pagination: { limit: 50 }) { items { assetBasicInfo { name ipAddress type userDomain } operatingSystem { caption } assetCustom { serialNumber warrantyDate location } } } } }" } | ConvertTo-Json\n\n` +
+                        `$result = Invoke-RestMethod -Uri 'https://api.lansweeper.com/api/v2/graphql' \`\n` +
+                        `    -Method POST \`\n` +
+                        `    -Headers @{ 'Authorization' = "Token $PAT"; 'Content-Type' = 'application/json' } \`\n` +
+                        `    -Body $body\n\n` +
+                        `$result.data.site.assetResources.items | ForEach-Object {\n` +
+                        `    "$($_.assetBasicInfo.name)  |  $($_.assetBasicInfo.ipAddress)  |  $($_.operatingSystem.caption)"\n` +
+                        `}\n\n` +
+                        `Clear-SensitiveVars 'PAT','SiteId'`;
+
+                    setChatMessages(prev => [...prev.slice(0, -1), {
+                        type: 'bot',
+                        text: (isCors
+                            ? `⚠️ CORS blocked — Lansweeper's API doesn't allow direct browser calls (this is expected).\n\n`
+                            : `❌ Query failed: ${err.message}\n\n`) +
+                              `Copy and run this PowerShell script instead — prompts for PAT at runtime:\n\n` +
+                              `\`\`\`\n${psScript}\n\`\`\``
+                    }]);
+                }
+                // PAT lives only in this async closure — never persisted
+            };
+
+            // Chat submit
+            const handleChatSubmit = async (e) => {
+                e.preventDefault();
+                if (!chatInput.trim()) return;
+                const userText = chatInput.trim();
+                setChatInput('');
+
+                // ── Special commands ────────────────────────────────────────
+                if (/reset site id/i.test(userText)) {
+                    sessionStorage.removeItem('ls_site_id');
+                    setChatMessages(prev => [...prev,
+                        { type: 'user', text: userText },
+                        { type: 'bot', text: '✅ Site ID cleared — you will be prompted on next Lansweeper query.' }
+                    ]);
+                    return;
+                }
+
+                // ── Lansweeper live query intent ────────────────────────────
+                if (/\b(query assets?|ls query|lansweeper query|show assets?|asset list|get assets?|inventory query|run query|live query)\b/i.test(userText)) {
+                    await handleLansweeperQuery(userText);
+                    return;
+                }
+
+                // ── Normal Q&A ──────────────────────────────────────────────
+                const newMessages = [...chatMessages, { type: 'user', text: userText }];
+                const answer = findAnswer(userText);
+                newMessages.push({ type: 'bot', text: answer });
+                setChatMessages(newMessages);
+            };
+
+            // Add category
+            const handleAddCategory = (e) => {
+                e.preventDefault();
+                if (!newCategory.name.trim()) return;
+
+                const id = newCategory.name.toLowerCase().replace(/\s+/g, '_');
+                setCategories([...categories, {
+                    id,
+                    name: newCategory.name,
+                    icon: newCategory.icon || '📌'
+                }]);
+                setNewCategory({ name: '', icon: '' });
+                alert('✅ Category added!');
+            };
+
+            // Add Q&A with CODE field
+            const handleAddQA = (e) => {
+                e.preventDefault();
+                if (!newQA.question.trim() || !newQA.answer.trim()) return;
+
+                setQaItems([...qaItems, {
+                    id: nextId,
+                    category: newQA.category,
+                    question: newQA.question,
+                    answer: newQA.answer,
+                    description: newQA.description,
+                    keyPhrases: newQA.keyPhrases,
+                    code: newQA.code || ''
+                }]);
+                setNextId(nextId + 1);
+                setNewQA({
+                    question: '',
+                    answer: '',
+                    description: '',
+                    keyPhrases: '',
+                    code: '',
+                    category: categories[0]?.id || 'general'
+                });
+                alert('✅ Q&A item added!');
+            };
+
+            // Copy code to clipboard
+            const copyCode = (code, id) => {
+                navigator.clipboard.writeText(code).then(() => {
+                    setCopiedId(id);
+                    setTimeout(() => setCopiedId(null), 2000);
+                });
+            };
+
+            // Render chat message — detects ```...``` blocks and adds copy buttons
+            const renderChatMessage = (text, msgIdx) => {
+                if (!text.includes('```')) {
+                    return React.createElement('span', { style: { whiteSpace: 'pre-wrap' } }, text);
+                }
+                const parts = text.split(/(```[\s\S]*?```)/);
+                return React.createElement('div', null,
+                    parts.map((part, i) => {
+                        if (part.startsWith('```') && part.endsWith('```')) {
+                            const code = part.slice(3, -3).replace(/^\n/, '');
+                            const key = `chat-${msgIdx}-${i}`;
+                            return React.createElement('div', { key: i, className: 'mt-2' },
+                                React.createElement('div', { className: 'flex justify-between items-center bg-gray-800 rounded-t px-3 py-1' },
+                                    React.createElement('span', { className: 'text-xs text-gray-400' }, 'PowerShell'),
+                                    React.createElement('button', {
+                                        onClick: () => navigator.clipboard.writeText(code).then(() => {
+                                            setCopiedChatId(key);
+                                            setTimeout(() => setCopiedChatId(null), 2000);
+                                        }),
+                                        className: `text-xs px-2 py-1 rounded transition-all ${copiedChatId === key ? 'bg-green-500 text-white' : 'bg-gray-600 text-gray-200 hover:bg-gray-500'}`
+                                    }, copiedChatId === key ? '✅ Copied!' : '📋 Copy')
+                                ),
+                                React.createElement('pre', { className: 'bg-gray-900 text-green-400 p-3 rounded-b text-xs overflow-x-auto font-mono' }, code)
+                            );
+                        }
+                        return React.createElement('span', { key: i, style: { whiteSpace: 'pre-wrap' } }, part);
+                    })
+                );
+            };
+
+            // Delete Q&A
+            const handleDeleteQA = (id) => {
+                if (confirm('Delete this Q&A?')) {
+                    setQaItems(qaItems.filter(item => item.id !== id));
+                    alert('✅ Q&A deleted!');
+                }
+            };
+
+            // Export data with CODE field
+            const handleExport = () => {
+                const data = { categories, qaItems };
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `clippy-qa-code-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                alert('✅ Data exported!');
+            };
+
+            // Import data
+            const handleImport = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const imported = JSON.parse(event.target.result);
+                        if (imported.categories) setCategories(imported.categories);
+                        if (imported.qaItems) {
+                            setQaItems(imported.qaItems);
+                            const maxId = Math.max(...imported.qaItems.map(item => item.id), 0);
+                            setNextId(maxId + 1);
+                        }
+                        alert('✅ Data imported successfully!');
+                    } catch (error) {
+                        alert('❌ Error importing file. Make sure it\'s valid JSON.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            const filteredItems = getFilteredItems();
+
+            return React.createElement('div', { className: 'min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100' },
+                // Header
+                React.createElement('header', { className: 'bg-white shadow-md border-b-4 border-indigo-600 sticky top-0 z-50' },
+                    React.createElement('div', { className: 'max-w-7xl mx-auto px-6 py-4' },
+                        React.createElement('div', { className: 'flex items-center justify-between' },
+                            React.createElement('div', { className: 'flex items-center gap-3' },
+                                React.createElement('div', { className: 'text-3xl' }, '📎'),
+                                React.createElement('div', null,
+                                    React.createElement('h1', { className: 'text-2xl font-bold text-indigo-600' }, 'Clippy Q&A'),
+                                    React.createElement('p', { className: 'text-xs text-gray-600' }, 'Code Edition')
+                                )
+                            ),
+                            React.createElement('div', { className: 'flex gap-2' },
+                                React.createElement('button', {
+                                    onClick: () => setViewMode('chat'),
+                                    className: `px-4 py-2 rounded-lg transition-all ${viewMode === 'chat' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                                }, '💬 Chat'),
+                                React.createElement('button', {
+                                    onClick: () => setViewMode('list'),
+                                    className: `px-4 py-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                                }, '📋 Browse'),
+                                React.createElement('button', {
+                                    onClick: () => setViewMode('admin'),
+                                    className: `px-4 py-2 rounded-lg transition-all ${viewMode === 'admin' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                                }, '⚙️ Admin')
+                            )
+                        )
+                    )
+                ),
+
+                // Main Content
+                React.createElement('main', { className: 'max-w-7xl mx-auto px-6 py-8' },
+                    // Search
+                    (viewMode === 'chat' || viewMode === 'list') && React.createElement('div', { className: 'mb-6' },
+                        React.createElement('div', { className: 'flex items-center gap-2 bg-white px-4 py-3 rounded-lg shadow-md border-2 border-indigo-200' },
+                            React.createElement('span', null, '🔍'),
+                            React.createElement('input', {
+                                type: 'text',
+                                placeholder: 'Search questions, code, phrases, descriptions...',
+                                value: searchTerm,
+                                onChange: (e) => setSearchTerm(e.target.value),
+                                className: 'flex-1 outline-none text-lg'
+                            })
+                        ),
+                        searchTerm && React.createElement('p', { className: 'text-sm text-gray-600 mt-2' }, `Found ${filteredItems.length} result${filteredItems.length !== 1 ? 's' : ''}`)
+                    ),
+
+                    // Category Filter
+                    viewMode === 'list' && React.createElement('div', { className: 'mb-6 flex flex-wrap gap-2' },
+                        React.createElement('button', {
+                            onClick: () => setSelectedCategory('all'),
+                            className: `px-4 py-2 rounded-full transition-all font-medium ${selectedCategory === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border-2 border-indigo-200 hover:border-indigo-600'}`
+                        }, 'All Topics'),
+                        categories.map(cat =>
+                            React.createElement('button', {
+                                key: cat.id,
+                                onClick: () => setSelectedCategory(cat.id),
+                                className: `px-4 py-2 rounded-full transition-all font-medium ${selectedCategory === cat.id ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border-2 border-indigo-200 hover:border-indigo-600'}`
+                            }, `${cat.icon} ${cat.name}`)
+                        )
+                    ),
+
+                    // CHAT MODE
+                    viewMode === 'chat' && React.createElement('div', { className: 'flex flex-col h-[600px] bg-white rounded-lg shadow-lg border-2 border-indigo-200 overflow-hidden' },
+                        React.createElement('div', { className: 'flex-1 overflow-y-auto p-6 space-y-4' },
+                            chatMessages.map((msg, idx) =>
+                                React.createElement('div', {
+                                    key: idx,
+                                    className: `flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`
+                                },
+                                    React.createElement('div', {
+                                        className: `${msg.type === 'user' ? 'max-w-md bg-indigo-600 text-white rounded-br-none' : 'max-w-2xl bg-gray-100 text-gray-800 rounded-bl-none'} px-4 py-3 rounded-lg`
+                                    }, renderChatMessage(msg.text, idx))
+                                )
+                            )
+                        ),
+                        React.createElement('form', { onSubmit: handleChatSubmit, className: 'border-t-2 border-indigo-200 p-4 bg-gray-50' },
+                            React.createElement('div', { className: 'flex gap-2' },
+                                React.createElement('input', {
+                                    type: 'text',
+                                    value: chatInput,
+                                    onChange: (e) => setChatInput(e.target.value),
+                                    placeholder: 'Ask a question...',
+                                    className: 'flex-1 px-4 py-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-600'
+                                }),
+                                React.createElement('button', {
+                                    type: 'submit',
+                                    className: 'bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium'
+                                }, '✉️ Send')
+                            )
+                        )
+                    ),
+
+                    // LIST MODE
+                    viewMode === 'list' && React.createElement('div', { className: 'space-y-3' },
+                        filteredItems.length > 0 ? (
+                            filteredItems.map(item =>
+                                React.createElement('div', {
+                                    key: item.id,
+                                    className: 'bg-white rounded-lg shadow-md border-2 border-indigo-200 overflow-hidden hover:shadow-lg transition-shadow'
+                                },
+                                    React.createElement('button', {
+                                        onClick: () => setExpandedItems(prev => ({ ...prev, [item.id]: !prev[item.id] })),
+                                        className: 'w-full px-6 py-4 flex items-center justify-between hover:bg-indigo-50 transition-colors'
+                                    },
+                                        React.createElement('div', { className: 'text-left' },
+                                            React.createElement('p', { className: 'font-semibold text-gray-800 text-lg' }, item.question),
+                                            React.createElement('p', { className: 'text-sm text-indigo-600 mt-1' }, categories.find(c => c.id === item.category)?.name),
+                                            item.code && React.createElement('p', { className: 'text-xs text-orange-600 mt-1' }, '📝 Has code snippet')
+                                        ),
+                                        React.createElement('span', { className: 'text-indigo-600' }, expandedItems[item.id] ? '▲' : '▼')
+                                    ),
+                                    expandedItems[item.id] && React.createElement('div', { className: 'border-t-2 border-indigo-200 px-6 py-4 bg-indigo-50 space-y-4' },
+                                        React.createElement('div', null,
+                                            React.createElement('p', { className: 'text-gray-700 font-semibold mb-2' }, 'Answer:'),
+                                            React.createElement('p', { className: 'text-gray-700' }, item.answer)
+                                        ),
+                                        item.description && React.createElement('div', null,
+                                            React.createElement('p', { className: 'text-gray-600 text-sm' }, '📝 ', item.description)
+                                        ),
+                                        item.keyPhrases && React.createElement('div', null,
+                                            React.createElement('p', { className: 'text-gray-600 text-sm' }, '🔑 Key phrases: ', item.keyPhrases)
+                                        ),
+                                        item.code && React.createElement('div', null,
+                                            React.createElement('div', { className: 'flex items-center justify-between mb-2' },
+                                                React.createElement('p', { className: 'font-semibold text-gray-800' }, '💻 Code:'),
+                                                React.createElement('button', {
+                                                    onClick: () => copyCode(item.code, item.id),
+                                                    className: `px-3 py-1 rounded text-sm transition-all ${copiedId === item.id ? 'bg-green-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`
+                                                }, copiedId === item.id ? '✅ Copied!' : '📋 Copy')
+                                            ),
+                                            React.createElement('pre', { className: 'bg-gray-900 text-gray-100 p-4 rounded overflow-x-auto text-sm font-mono' },
+                                                React.createElement('code', null, item.code)
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ) : (
+                            React.createElement('div', { className: 'text-center py-12' },
+                                React.createElement('p', { className: 'text-xl text-gray-600' }, 'No results found.')
+                            )
+                        )
+                    ),
+
+                    // ADMIN MODE
+                    viewMode === 'admin' && React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-2 gap-6' },
+                        // Add Category
+                        React.createElement('div', { className: 'bg-white rounded-lg shadow-lg border-2 border-indigo-200 p-6' },
+                            React.createElement('h2', { className: 'text-2xl font-bold text-indigo-600 mb-4' }, '➕ Add Category'),
+                            React.createElement('form', { onSubmit: handleAddCategory, className: 'space-y-4' },
+                                React.createElement('input', {
+                                    type: 'text',
+                                    placeholder: 'Category name',
+                                    value: newCategory.name,
+                                    onChange: (e) => setNewCategory({ ...newCategory, name: e.target.value }),
+                                    className: 'w-full px-4 py-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-600'
+                                }),
+                                React.createElement('input', {
+                                    type: 'text',
+                                    placeholder: 'Emoji icon',
+                                    value: newCategory.icon,
+                                    onChange: (e) => setNewCategory({ ...newCategory, icon: e.target.value }),
+                                    className: 'w-full px-4 py-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-600',
+                                    maxLength: '2'
+                                }),
+                                React.createElement('button', {
+                                    type: 'submit',
+                                    className: 'w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 font-bold'
+                                }, '✅ Add')
+                            )
+                        ),
+
+                        // Add Q&A with CODE field
+                        React.createElement('div', { className: 'bg-white rounded-lg shadow-lg border-2 border-indigo-200 p-6' },
+                            React.createElement('h2', { className: 'text-2xl font-bold text-indigo-600 mb-4' }, '➕ Add Q&A'),
+                            React.createElement('form', { onSubmit: handleAddQA, className: 'space-y-4 max-h-96 overflow-y-auto' },
+                                React.createElement('select', {
+                                    value: newQA.category,
+                                    onChange: (e) => setNewQA({ ...newQA, category: e.target.value }),
+                                    className: 'w-full px-4 py-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-600'
+                                },
+                                    categories.map(cat =>
+                                        React.createElement('option', { key: cat.id, value: cat.id }, cat.name)
+                                    )
+                                ),
+                                React.createElement('textarea', {
+                                    placeholder: 'Question',
+                                    value: newQA.question,
+                                    onChange: (e) => setNewQA({ ...newQA, question: e.target.value }),
+                                    className: 'w-full px-4 py-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-600',
+                                    rows: '2'
+                                }),
+                                React.createElement('textarea', {
+                                    placeholder: 'Answer',
+                                    value: newQA.answer,
+                                    onChange: (e) => setNewQA({ ...newQA, answer: e.target.value }),
+                                    className: 'w-full px-4 py-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-600',
+                                    rows: '3'
+                                }),
+                                React.createElement('textarea', {
+                                    placeholder: 'Description/Details',
+                                    value: newQA.description,
+                                    onChange: (e) => setNewQA({ ...newQA, description: e.target.value }),
+                                    className: 'w-full px-4 py-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-600',
+                                    rows: '2'
+                                }),
+                                React.createElement('textarea', {
+                                    placeholder: 'Key phrases (comma-separated)',
+                                    value: newQA.keyPhrases,
+                                    onChange: (e) => setNewQA({ ...newQA, keyPhrases: e.target.value }),
+                                    className: 'w-full px-4 py-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-600',
+                                    rows: '2'
+                                }),
+                                React.createElement('textarea', {
+                                    placeholder: 'Code/JavaScript (optional)',
+                                    value: newQA.code,
+                                    onChange: (e) => setNewQA({ ...newQA, code: e.target.value }),
+                                    className: 'w-full px-4 py-2 border-2 border-orange-300 rounded-lg focus:outline-none focus:border-orange-600 font-mono text-sm',
+                                    rows: '4'
+                                }),
+                                React.createElement('button', {
+                                    type: 'submit',
+                                    className: 'w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 font-bold'
+                                }, '✅ Add Q&A')
+                            )
+                        ),
+
+                        // Export/Import
+                        React.createElement('div', { className: 'lg:col-span-2 bg-white rounded-lg shadow-lg border-2 border-indigo-200 p-6' },
+                            React.createElement('h2', { className: 'text-2xl font-bold text-indigo-600 mb-4' }, '💾 Data Management'),
+                            React.createElement('div', { className: 'grid grid-cols-2 gap-4' },
+                                React.createElement('button', {
+                                    onClick: handleExport,
+                                    className: 'bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-bold'
+                                }, '⬇️ Export JSON'),
+                                React.createElement('div', null,
+                                    React.createElement('label', { className: 'block w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-bold text-center cursor-pointer' },
+                                        '⬆️ Import JSON',
+                                        React.createElement('input', {
+                                            type: 'file',
+                                            accept: '.json',
+                                            onChange: handleImport,
+                                            className: 'hidden'
+                                        })
+                                    )
+                                )
+                            ),
+                            React.createElement('p', { className: 'text-sm text-gray-600 mt-4' }, '💡 Your JSON includes all Q&A with code snippets. Edit in VS Code and re-import.')
+                        ),
+
+                        // Current Items
+                        React.createElement('div', { className: 'lg:col-span-2 bg-white rounded-lg shadow-lg border-2 border-indigo-200 p-6' },
+                            React.createElement('h2', { className: 'text-2xl font-bold text-indigo-600 mb-4' }, `📚 Q&A Items (${qaItems.length})`),
+                            React.createElement('div', { className: 'space-y-2 max-h-80 overflow-y-auto' },
+                                qaItems.map(item =>
+                                    React.createElement('div', {
+                                        key: item.id,
+                                        className: 'bg-gray-100 p-3 rounded border-l-4 border-indigo-600'
+                                    },
+                                        React.createElement('div', { className: 'flex justify-between items-start' },
+                                            React.createElement('div', { className: 'flex-1' },
+                                                React.createElement('p', { className: 'font-semibold text-gray-800' }, item.question),
+                                                React.createElement('p', { className: 'text-xs text-gray-600' }, categories.find(c => c.id === item.category)?.name),
+                                                item.code && React.createElement('p', { className: 'text-xs text-orange-600 mt-1' }, '📝 Code: ' + item.code.substring(0, 30) + '...')
+                                            ),
+                                            React.createElement('button', {
+                                                onClick: () => handleDeleteQA(item.id),
+                                                className: 'text-red-600 hover:text-red-800 font-bold'
+                                            }, '🗑️')
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(ClippyQACodeEdition));
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+  "name": "clippy-qa-app",
+  "version": "1.0.0",
+  "description": "A web-based chatbot Q&A application that mirrors Power Virtual Agents / Copilot Studio functionality.",
+  "main": "index-code-edition.html",
+  "scripts": {
+    "start": "open index-code-edition.html",
+    "dev": "echo 'Open index-code-edition.html in your browser'"
+  },
+  "keywords": [
+    "chatbot",
+    "qa",
+    "react",
+    "question-answer",
+    "copilot",
+    "pva"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/clippy-qa-app.git"
+  },
+  "homepage": "https://github.com/yourusername/clippy-qa-app#readme",
+  "bugs": {
+    "url": "https://github.com/yourusername/clippy-qa-app/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "notes": {
+    "setup": "This is a single-file HTML application. No installation required. Simply open index-code-edition.html in any modern web browser.",
+    "external_libraries": [
+      "React (via CDN from unpkg.com)",
+      "Tailwind CSS (via CDN from cdn.tailwindcss.com)",
+      "Lucide React (via CDN from unpkg.com)"
+    ]
+  }
+}
